@@ -6,6 +6,15 @@ const fs = require('fs')
 
 // Force colors for packages that depend on https://www.npmjs.com/package/supports-color
 const { supportsColor } = require('chalk')
+const cmdline = require('commander')
+const debugLib = require('debug')
+const debug = debugLib('lint-staged:bin')
+
+const lintStaged = require('../lib')
+const { version } = require('../package.json')
+const { CONFIG_STDIN_ERROR } = require('../lib/messages')
+
+// Force colors for packages that depend on https://www.npmjs.com/package/supports-color
 if (supportsColor && supportsColor.level) {
   process.env.FORCE_COLOR = supportsColor.level.toString()
 }
@@ -13,24 +22,8 @@ if (supportsColor && supportsColor.level) {
 // Do not terminate main Listr process on SIGINT
 process.on('SIGINT', () => {})
 
-const pkg = require('../package.json')
-require('please-upgrade-node')(
-  Object.assign({}, pkg, {
-    engines: {
-      node: '>=10.13.0', // First LTS release of 'Dubnium'
-    },
-  })
-)
-
-const cmdline = require('commander')
-const debugLib = require('debug')
-const lintStaged = require('../lib')
-const { CONFIG_STDIN_ERROR } = require('../lib/messages')
-
-const debug = debugLib('lint-staged:bin')
-
 cmdline
-  .version(pkg.version)
+  .version(version)
   .option('--allow-empty', 'allow empty commits when tasks revert all staged changes', false)
   .option('-c, --config [path]', 'path to configuration file, or - to read from stdin')
   .option('-d, --debug', 'print additional debug information', false)
@@ -55,7 +48,7 @@ if (cmdline.debug) {
   debugLib.enable('lint-staged*')
 }
 
-debug('Running `lint-staged@%s`', pkg.version)
+debug('Running `lint-staged@%s`', version)
 
 /**
  * Get the maximum length of a command-line argument string based on current platform
